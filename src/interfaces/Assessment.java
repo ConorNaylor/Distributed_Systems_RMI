@@ -1,9 +1,13 @@
 // Assessment.java 
 
-package ct414;
+package interfaces;
 
 import java.util.Date;
 import java.util.List;
+
+import exceptions.InvalidOptionNumber;
+import exceptions.InvalidQuestionNumber;
+
 import java.io.Serializable;
 
 public interface Assessment extends Serializable {

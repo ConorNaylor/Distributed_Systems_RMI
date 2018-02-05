@@ -1,10 +1,13 @@
 // ExamServer.java
 
-package ct414;
+package interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+
+import exceptions.NoMatchingAssessment;
+import exceptions.UnauthorizedAccess;
 
 public interface ExamServer extends Remote {
 

@@ -1,4 +1,4 @@
-package CT414_RMI;
+package exceptions;
 
 public class InvalidOptionNumber extends Exception {
 
