@@ -12,12 +12,13 @@ import java.util.List;
 import exceptions.*;
 import interfaces.Assessment;
 import interfaces.ExamServer;
+import interfaces.Question;
 
 public class ExamEngine implements ExamServer {
 
 	private Session sess;
 	private ArrayList<Session> sessions = new ArrayList<Session>();
-	private ArrayList<Assessment> assessments = new ArrayList<Assessment>();
+	private ArrayList<MCQAssessment> assessments = new ArrayList<MCQAssessment>();
 
 	// Constructor is required
 	public ExamEngine() {
@@ -28,8 +29,23 @@ public class ExamEngine implements ExamServer {
 		Student s1 = new Student(12345678,"password");
 		Student s2 = new Student(87654321,"password");
 		
-		assessments.add(new MCQAssessment(s1.getId(), "CT454", "Computer Science", date));
-		assessments.add(new MCQAssessment(s2.getId(), "BE420", "Computer Engineering", date));
+		MCQAssessment assA = new MCQAssessment(s1.getId(), "CT454", "Computer Science", date);
+		MCQAssessment assB = new MCQAssessment(s2.getId(), "BE420", "Computer Engineering", date);
+		
+		assessments.add(assA);
+		assessments.add(assB);
+		
+		String[] answers = new String[] {"An Gunna Mór","Carrauntoohil", "Mount Brandon", "Croagh Patrick"};
+		String[] answers2 = new String[] {"Imaginary","Fake News", "Hardware", "D"};
+
+		MCQQuestion question1 = new MCQQuestion("What is the tallest mountain in Ireland.", answers, 1, 1);
+		MCQQuestion question2 = new MCQQuestion("What is an FPGA.", answers2, 2, 1);
+		
+		assA.setQuestion(question1);
+		assA.setQuestion(question2);
+		
+		assB.setQuestion(question1);
+		assB.setQuestion(question2);
 	}
 
 	// Implement the methods defined in the ExamServer interface...
@@ -53,7 +69,7 @@ public class ExamEngine implements ExamServer {
 	UnauthorizedAccess, NoMatchingAssessment, RemoteException {
 		List<String> list = new ArrayList<String>();
 		if(isActiveSession(token)) {
-			for(Assessment a: assessments) {
+			for(MCQAssessment a: assessments) {
 				if(a.getAssociatedID()==studentid) {
 					list.add(a.getInformation());
 				}
@@ -66,19 +82,27 @@ public class ExamEngine implements ExamServer {
 	// Return an Assessment object associated with a particular course code
 	public Assessment getAssessment(int token, int studentid, String courseCode) throws
 	UnauthorizedAccess, NoMatchingAssessment, RemoteException {
-
-		// TBD: You need to implement this method!
-		// For the moment method just returns an empty or null value to allow it to compile
-
-		return null;
+			if(isActiveSession(token)) {
+				for(MCQAssessment a: assessments) {
+					if(a.getAssociatedID() == studentid && a.getCourseCode() == courseCode ) {
+						return a;
+					}
+					throw new NoMatchingAssessment("User has no assessments.");
+				}
+			}
+			throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
 	// Submit a completed assessment
 	public void submitAssessment(int token, int studentid, Assessment completed) throws 
 	UnauthorizedAccess, NoMatchingAssessment, RemoteException {
-
-		// TBD: You need to implement this method!
+			if(isActiveSession(token)) {
+				MCQAssessment assessment = (MCQAssessment) this.getAssessment(token, studentid, ((MCQAssessment) completed).getCourseCode());
+		        this.assessments.remove(assessment);
+			}
+			throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
+	
 
 	public boolean isActiveSession(long sessionId) throws UnauthorizedAccess{
 		for(Session s: sessions) {
@@ -91,7 +115,7 @@ public class ExamEngine implements ExamServer {
 
 	public static void main(String[] args) {
 		if (System.getSecurityManager() == null) {
-			//        		System.setProperty("java.security.policy", "security.policy");
+			System.setProperty("java.security.policy", "security.policy");
 			//        		System.setProperty("java.rmi.server.hostname","localhost");
 			System.setSecurityManager(new SecurityManager());
 		}

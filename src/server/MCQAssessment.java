@@ -24,6 +24,10 @@ public class MCQAssessment implements Assessment{
 		this.date = date;
 	}
 	
+	public void setQuestion(MCQQuestion q) {
+		questions.add(q);
+	}
+	
 	@Override
 	public String getInformation() {
 		return "Assessment " + name + " for course " + this.courseCode + " for student " + studentId + " with closing date " + date; 
@@ -57,6 +61,10 @@ public class MCQAssessment implements Assessment{
 	@Override
 	public int getAssociatedID() {
 		return this.studentId;
+	}
+	
+	public String getCourseCode() {
+		return this.courseCode;
 	}
 
 }
