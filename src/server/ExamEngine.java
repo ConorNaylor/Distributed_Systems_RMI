@@ -16,8 +16,8 @@ import interfaces.ExamServer;
 public class ExamEngine implements ExamServer {
 
 	private Session sess;
-	private ArrayList<Session> sessions;
-	private ArrayList<Assessment> assessments;
+	private ArrayList<Session> sessions = new ArrayList<Session>();
+	private ArrayList<Assessment> assessments = new ArrayList<Assessment>();
 
 	// Constructor is required
 	public ExamEngine() {

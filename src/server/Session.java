@@ -41,6 +41,4 @@ public class Session extends TimerTask{
 		
 	}
 	
-	
-
 }

@@ -7,7 +7,7 @@ public class Student {
 	private int id;
 	private String password;
 
-	public static ArrayList<Student> students;
+	public static ArrayList<Student> students = new ArrayList<Student>();
 	
 	public Student(int id, String pw) {
 		this.id = id;
