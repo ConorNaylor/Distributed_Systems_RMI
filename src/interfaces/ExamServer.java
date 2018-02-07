@@ -12,7 +12,7 @@ import exceptions.UnauthorizedAccess;
 public interface ExamServer extends Remote {
 
 	// Return an access token that allows access to the server for some time period
-	public int login(int studentid, String password) throws 
+	public long login(int studentid, String password) throws 
 		UnauthorizedAccess, RemoteException;
 
 	// Return a summary list of Assessments currently available for this studentid
