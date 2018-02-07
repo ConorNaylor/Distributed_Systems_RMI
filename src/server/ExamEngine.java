@@ -12,7 +12,7 @@ import exceptions.UnauthorizedAccess;
 import interfaces.Assessment;
 import interfaces.ExamServer;
 
-public class ExamEngine extends UnicastRemoteObject implements ExamServer {
+public class ExamEngine implements ExamServer {
 
 	private ArrayList<Student> students;
 	private ArrayList<SessionToken> sessions;
@@ -21,6 +21,13 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 	// Constructor is required
 	public ExamEngine() throws RemoteException {
 		super();
+		students = new ArrayList<Student>();
+		sessions = new ArrayList<SessionToken>();
+		assessments = new ArrayList<Assessment>();
+		students.add(new Student(14407778, "password"));
+		students.add(new Student(12345678, "password"));
+		students.add(new Student(98765432, "password"));
+		
 	}
 
 	// Implement the methods defined in the ExamServer interface...
@@ -30,8 +37,9 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 		for (Student student : students) {
 			if (studentid == (student.getstudentID())) {
 				if (password.equals(student.getPassword())) {
-					token = new SessionToken(student);
-					sessions.add(token);
+					System.out.println("Logged in");
+					//token = new SessionToken(student);
+					//sessions.add(token);
 
 				} else {
 					throw new UnauthorizedAccess("Incorrect password");
@@ -40,7 +48,7 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 				throw new UnauthorizedAccess("Student not registered");
 			}
 		}
-		return token.getToken();
+		return 12131;
 	}
 
 	// Return a summary list of Assessments currently available for this studentid
@@ -84,7 +92,8 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 					throw new UnauthorizedAccess("Session expired");
 				}
 			}
-		} throw new NoMatchingAssessment("No assessments available");
+		}
+		throw new NoMatchingAssessment("No assessments available");
 	}
 
 	// Submit a completed assessment
@@ -96,7 +105,7 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 					if (assessments.isEmpty()) {
 						for (Assessment assessment : assessments) {
 							if (assessment.getAssociatedID() == studentid
-							 && assessment.getInformation().equals(completed.getInformation())) {
+									&& assessment.getInformation().equals(completed.getInformation())) {
 								assessment = completed;
 							}
 						}
@@ -107,11 +116,13 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 					throw new UnauthorizedAccess("Session expired");
 				}
 			}
-		} throw new NoMatchingAssessment("No assessments available");
+		}
+		throw new NoMatchingAssessment("No assessments available");
 	}
 
 	public static void main(String[] args) {
 		if (System.getSecurityManager() == null) {
+			System.setProperty("java.security.policy", "security.policy");
 			System.setSecurityManager(new SecurityManager());
 		}
 		try {
@@ -120,8 +131,6 @@ public class ExamEngine extends UnicastRemoteObject implements ExamServer {
 			ExamServer stub = (ExamServer) UnicastRemoteObject.exportObject(engine, 0);
 			Registry registry = LocateRegistry.getRegistry();
 			registry.rebind(name, stub);
-
-			System.err.println("Server ready");
 			System.out.println("ExamEngine bound");
 		} catch (Exception e) {
 			System.err.println("ExamEngine exception:");
