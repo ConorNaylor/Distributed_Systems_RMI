@@ -44,10 +44,9 @@ public class Client {
 	private static Assessment assessment;
 	private static Question question;
 	private static int selectedQuestion;
+	
 	public static void main(String[] args) {
-
 		GUI();
-
 		String host = (args.length < 1) ? null : args[0];
 		try {
 			Registry registry = LocateRegistry.getRegistry(host);
@@ -56,7 +55,6 @@ public class Client {
 			System.err.println("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
-
 	}
 
 	public static void GUI() {
@@ -104,11 +102,9 @@ public class Client {
 				// login
 				String pass = password.getText();
 				studentid = Integer.valueOf(username.getText());
-				System.out.println(studentid + " " + pass);
 
 				try {
 					token = stub.login(studentid, pass);
-					System.out.println(token);
 					summaries = stub.getAvailableSummary(token, studentid);
 				} catch (RemoteException e1) {
 					System.out.println(e1.getMessage());
@@ -143,10 +139,12 @@ public class Client {
 
 				String selected = (String) assessments.getSelectedItem();
 
+				System.out.println(selected);
 				try {
 					assessment = stub.getAssessment(token, studentid, selected);
 					questionsModel.removeAllElements();
 					for (Question item : assessment.getQuestions()) {
+						System.out.println(item.getQuestionDetail());
 						questionsModel.addElement(item.getQuestionDetail());
 					}
 					qs.setModel(questionsModel);
@@ -154,15 +152,16 @@ public class Client {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
 			}
 		});
 
 		qs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				selectedQuestion = qs.getSelectedIndex();
-				System.out.println(selectedQuestion);
+				if(selectedQuestion < 0) {
+					selectedQuestion =0;
+				}
+				System.out.println("question " +selectedQuestion);
 				try {
 					question = assessment.getQuestion(selectedQuestion);
 					answersModel.removeAllElements();
@@ -171,7 +170,6 @@ public class Client {
 					}
 					answers.setModel(answersModel);
 				} catch (InvalidQuestionNumber e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
