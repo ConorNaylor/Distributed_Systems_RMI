@@ -120,12 +120,8 @@ public class Client {
 				for (String item : summaries) {
 					assessmentSummary.append(item + "\n");
 					String coursecode = item.substring(item.lastIndexOf("course")+7, item.lastIndexOf(" for"));
-					
 					coursecodes.add(coursecode);
 				}
-				
-				// get all assignments
-				// updates content of assessments combobox
 				assessmentsModel.removeAllElements();
 				for (String item : coursecodes) {
 					assessmentsModel.addElement(item);
@@ -146,7 +142,6 @@ public class Client {
 					}
 					qs.setModel(questionsModel);
 				} catch (RemoteException | UnauthorizedAccess | NoMatchingAssessment e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
