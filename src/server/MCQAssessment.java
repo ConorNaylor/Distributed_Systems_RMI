@@ -66,5 +66,9 @@ public class MCQAssessment implements Assessment{
 	public String getCourseCode() {
 		return this.courseCode;
 	}
+	
+	public String getName() {
+		return this.name;
+	}
 
 }

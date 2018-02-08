@@ -31,27 +31,55 @@ public class ExamEngine implements ExamServer {
 
 		MCQAssessment assA = new MCQAssessment(s1.getId(), "CT454", "Computer Science", date);
 		MCQAssessment assB = new MCQAssessment(s2.getId(), "BE420", "Computer Engineering", date);
+		MCQAssessment assC = new MCQAssessment(s1.getId(), "CT111", "Electronic Engineering", date);
+		MCQAssessment assD = new MCQAssessment(s2.getId(), "BE100", "IT", date);
 
 		assessments.add(assA);
 		assessments.add(assB);
+		assessments.add(assC);
+		assessments.add(assD);
 
 		String[] answers = new String[] { "An Gunna Mór", "Carrauntoohil", "Mount Brandon", "Croagh Patrick" };
 		String[] answers2 = new String[] { "Imaginary", "Fake News", "Hardware", "D" };
+		String[] answers3 = new String[] {"1","2","3","4","5"};
+		String[] answers4 = new String[] {"Everything","Nothing","Brogan","D","or E"};
 
 		MCQQuestion question1 = new MCQQuestion("What is the tallest mountain in Ireland?", answers, 1, 1);
 		MCQQuestion question2 = new MCQQuestion("What is an FPGA?", answers2, 2, 1);
+		MCQQuestion question3 = new MCQQuestion("Which is the biggest number?", answers3, 3, 3);
+		MCQQuestion question4 = new MCQQuestion("What is raaaank?", answers4, 4, 2);
+
 
 		assA.setQuestion(question1);
 		assA.setQuestion(question2);
+		assA.setQuestion(question3);
+		assA.setQuestion(question4);
 
 		assB.setQuestion(question1);
 		assB.setQuestion(question2);
+		assB.setQuestion(question3);
+		assB.setQuestion(question4);
+		
+		assC.setQuestion(question1);
+		assC.setQuestion(question2);
+		assC.setQuestion(question3);
+		assC.setQuestion(question4);
+
+		assD.setQuestion(question1);
+		assD.setQuestion(question2);
+		assD.setQuestion(question3);
+		assD.setQuestion(question4);
 	}
 
 	// Implement the methods defined in the ExamServer interface...
 	// Return an access token that allows access to the server for some time period
 
 	public long login(int studentid, String password) throws UnauthorizedAccess, RemoteException {
+		for(Session s: sessions) {
+			if(s.getStudent().getId() == studentid) {
+				return s.getSessionNumber();
+			}
+		}
 		for (Student s : Student.students) {
 			if (studentid == (s.getId()) && password.equals(s.getPassword())) {
 				sess = new Session(s);
@@ -72,6 +100,7 @@ public class ExamEngine implements ExamServer {
 				for (MCQAssessment a : assessments) {
 					if (a.getAssociatedID() == studentid) {
 						list.add(a.getInformation());
+						System.out.println("Adding assessment: " + a.getName() + " to list for " + studentid);
 					}
 				}
 				if (!list.isEmpty()) {
@@ -89,6 +118,7 @@ public class ExamEngine implements ExamServer {
 		if (isActiveSession(token)) {
 			for (MCQAssessment a : assessments) {
 				if (a.getAssociatedID() == studentid && a.getCourseCode().equals(courseCode)) {
+					System.out.println("Returning assessment: " + a.getName() + " for " + studentid);
 					return a;
 				}
 			}
@@ -104,6 +134,7 @@ public class ExamEngine implements ExamServer {
 			MCQAssessment assessment = (MCQAssessment) this.getAssessment(token, studentid,
 					((MCQAssessment) completed).getCourseCode());
 			this.assessments.remove(assessment);
+			System.out.println("Assessment completed: " + assessment.getName() + "for user " + studentid);
 		} else {
 			throw new UnauthorizedAccess("Cannot authenticate user.");
 		}

@@ -5,7 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Session extends TimerTask{
-	
+
 	private Student student;
 	private long timestamp;
 	private boolean isActive = true;
@@ -17,7 +17,7 @@ public class Session extends TimerTask{
 		this.student = stud;
 		this.timestamp = System.currentTimeMillis();;
 		this.timer = new Timer();
-        this.startCountDown();
+		this.startCountDown();
 	}
 
 	private void startCountDown() {
@@ -27,18 +27,24 @@ public class Session extends TimerTask{
 	public long getSessionNumber() {
 		return this.timestamp;
 	}
-	
+
 	public boolean isSessionActive() {
 		return isActive;
+	}
+	
+	public Student getStudent() {
+		return this.student;
 	}
 
 	@Override
 	public void run() {
-		if((System.currentTimeMillis() - timestamp) > sessionLength) {
-			isActive = false;
-			System.out.println("Student: " + student + ", has timed out.");
+		while(isActive) {
+			if((System.currentTimeMillis() - timestamp) > sessionLength) {
+				isActive = false;
+				System.out.println("Student: " + student.getId() + ", has timed out.");
+			}
 		}
-		
+
 	}
-	
+
 }
