@@ -96,6 +96,8 @@ public class Client {
 		JComboBox answers = new JComboBox();
 		DefaultComboBoxModel answersModel = (DefaultComboBoxModel) answers.getModel();
 
+		JButton submitQuestion = new JButton("Submit Question Answer");
+		
 		JButton submit = new JButton("Submit Assessment");
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -142,7 +144,8 @@ public class Client {
 				String selected = (String) assessments.getSelectedItem();
 
 				try {
-					assessment = stub.getAssessment(token, studentid, selected);questionsModel.removeAllElements();
+					assessment = stub.getAssessment(token, studentid, selected);
+					questionsModel.removeAllElements();
 					for (Question item : assessment.getQuestions()) {
 						questionsModel.addElement(item.getQuestionDetail());
 					}
@@ -177,6 +180,12 @@ public class Client {
 		
 		answers.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			
+			}
+		});
+
+		submit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				int selected = answers.getSelectedIndex();
 				try {
 					assessment.selectAnswer(selectedQuestion, selected);
@@ -190,7 +199,11 @@ public class Client {
 		
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				try {
+					stub.submitAssessment(token, studentid, assessment);
+				} catch (RemoteException | UnauthorizedAccess | NoMatchingAssessment e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 
@@ -212,6 +225,8 @@ public class Client {
 		contentPane.add(qs);
 		contentPane.add(selectAnswer);
 		contentPane.add(answers);
+		contentPane.add(Box.createRigidArea(new Dimension(5, 10)));
+		contentPane.add(submitQuestion);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		contentPane.add(submit);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
