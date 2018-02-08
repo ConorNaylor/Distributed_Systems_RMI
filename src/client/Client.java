@@ -22,6 +22,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
+import exceptions.InvalidOptionNumber;
+import exceptions.InvalidQuestionNumber;
 import exceptions.NoMatchingAssessment;
 import exceptions.UnauthorizedAccess;
 import interfaces.Assessment;
@@ -33,10 +35,15 @@ public class Client {
 	private ArrayList<Assessment> assessments;
 	private ArrayList<Question> allQuestions;
 	private String[] answerOptions;
-	private static int token;
+	private static long token;
 	private String username;
 	private static ExamServer stub;
-	private List<String> summaries;
+	private static List<String> summaries;
+	private static ArrayList<String> coursecodes;
+	private static int studentid;
+	private static Assessment assessment;
+	private static Question question;
+	private static int selectedQuestion;
 	public static void main(String[] args) {
 
 		GUI();
@@ -60,8 +67,6 @@ public class Client {
 		contentPane.setLayout(layout);
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 
-		String[] ass = { "Bird", "Cat", "Dog", "Rabbit", "Pig" };
-		String[] assignments = { "Math", "English", "Irish" };
 		// login
 		JLabel usernameLabel = new JLabel("Username");
 		JLabel passwordLabel = new JLabel("Password");
@@ -76,32 +81,33 @@ public class Client {
 		assessmentSummary.setEditable(false);
 		assessmentSummary
 				.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		JButton summary = new JButton("Get Assessment Summaries");
+		JLabel summary = new JLabel("Get Assessment Summaries");
 
 		// select assessment
 		JLabel selectAssessment = new JLabel("Select Assessment");
-		JComboBox assessments = new JComboBox(ass);
+		JComboBox assessments = new JComboBox();
 		DefaultComboBoxModel assessmentsModel = (DefaultComboBoxModel) assessments.getModel();
 
 		// select questions
 		JLabel selectQuestion = new JLabel("Select Question");
-		JComboBox qs = new JComboBox(ass);
+		JComboBox qs = new JComboBox();
 		DefaultComboBoxModel questionsModel = (DefaultComboBoxModel) qs.getModel();
 		JLabel selectAnswer = new JLabel("Select Answer");
-		JComboBox answers = new JComboBox(ass);
+		JComboBox answers = new JComboBox();
 		DefaultComboBoxModel answersModel = (DefaultComboBoxModel) answers.getModel();
 
+		JButton submit = new JButton("Submit Assessment");
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// login
 				String pass = password.getText();
-				int name = Integer.valueOf(username.getText());
-				System.out.println(name + " " + pass);
+				studentid = Integer.valueOf(username.getText());
+				System.out.println(studentid + " " + pass);
 
 				try {
-					token = stub.login(name, pass);
+					token = stub.login(studentid, pass);
 					System.out.println(token);
-					List<String> summaries = stub.getAvailableSummary(token, name);
+					summaries = stub.getAvailableSummary(token, studentid);
 				} catch (RemoteException e1) {
 					System.out.println(e1.getMessage());
 				} catch (UnauthorizedAccess e1) {
@@ -110,10 +116,20 @@ public class Client {
 					System.out.println(e1.getMessage());
 				}
 				
+				coursecodes = new ArrayList<String>();
+				
+				assessmentSummary.setText("");
+				for (String item : summaries) {
+					assessmentSummary.setText(item);
+					String coursecode = item.substring(item.lastIndexOf("course")+7, item.lastIndexOf(" for"));
+					
+					coursecodes.add(coursecode);
+				}
+				
 				// get all assignments
 				// updates content of assessments combobox
 				assessmentsModel.removeAllElements();
-				for (String item : assignments) {
+				for (String item : coursecodes) {
 					assessmentsModel.addElement(item);
 				}
 				assessments.setModel(assessmentsModel);
@@ -123,38 +139,58 @@ public class Client {
 		assessments.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				int selected = assessments.getSelectedIndex();
+				String selected = (String) assessments.getSelectedItem();
 
-				// get assessment coursecode from summary
-
-				// get assessment
-
-				// get all assignments
-				// updates content of assessments combobox
-				questionsModel.removeAllElements();
-				for (String item : assignments) {
-					questionsModel.addElement(item);
+				try {
+					assessment = stub.getAssessment(token, studentid, selected);questionsModel.removeAllElements();
+					for (Question item : assessment.getQuestions()) {
+						questionsModel.addElement(item.getQuestionDetail());
+					}
+					qs.setModel(questionsModel);
+				} catch (RemoteException | UnauthorizedAccess | NoMatchingAssessment e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				qs.setModel(questionsModel);
+				
 			}
 		});
 
 		qs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				int selected = qs.getSelectedIndex();
-
-				// get assessment coursecode from summary
-
-				// get assessment
-
-				// get all assignments
-				// updates content of assessments combobox
-				answersModel.removeAllElements();
-				for (String item : assignments) {
-					answersModel.addElement(item);
+				selectedQuestion = qs.getSelectedIndex();
+				System.out.println(selectedQuestion);
+				try {
+					question = assessment.getQuestion(selectedQuestion);
+					answersModel.removeAllElements();
+					for (String item : question.getAnswerOptions()) {
+						answersModel.addElement(item);
+					}
+					answers.setModel(answersModel);
+				} catch (InvalidQuestionNumber e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				answers.setModel(answersModel);
+				
+			}
+		});
+		
+		answers.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int selected = answers.getSelectedIndex();
+				try {
+					assessment.selectAnswer(selectedQuestion, selected);
+				} catch (InvalidQuestionNumber e1) {
+					e1.printStackTrace();
+				} catch (InvalidOptionNumber e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		submit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
 			}
 		});
 
@@ -166,9 +202,8 @@ public class Client {
 		contentPane.add(Box.createRigidArea(new Dimension(5, 10)));
 		contentPane.add(login);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
-		contentPane.add(assessmentSummary);
-		contentPane.add(Box.createRigidArea(new Dimension(5, 10)));
 		contentPane.add(summary);
+		contentPane.add(assessmentSummary);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		contentPane.add(selectAssessment);
 		contentPane.add(assessments);
@@ -178,7 +213,9 @@ public class Client {
 		contentPane.add(selectAnswer);
 		contentPane.add(answers);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
+		contentPane.add(submit);
+		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		frame.setVisible(true);
-		frame.setSize(400, 600);
+		frame.setSize(800, 600);
 	}
 }
