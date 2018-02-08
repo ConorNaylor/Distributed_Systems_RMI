@@ -70,8 +70,10 @@ public class ExamEngine implements ExamServer {
 		if (isActiveSession(token)) {
 			if (!assessments.isEmpty()) {
 				for (MCQAssessment a : assessments) {
+					if (a.getAssociatedID() == studentid) {
 						list.add(a.getInformation());
 					}
+				}
 				if (!list.isEmpty()) {
 					return list;
 				}
@@ -89,8 +91,10 @@ public class ExamEngine implements ExamServer {
 				if (a.getAssociatedID() == studentid && a.getCourseCode().equals(courseCode)) {
 					return a;
 				}
-			} throw new NoMatchingAssessment("User has no assessments.");
-		} throw new UnauthorizedAccess("Cannot authenticate user.");
+			}
+			throw new NoMatchingAssessment("User has no assessments.");
+		}
+		throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
 	// Submit a completed assessment
@@ -100,8 +104,9 @@ public class ExamEngine implements ExamServer {
 			MCQAssessment assessment = (MCQAssessment) this.getAssessment(token, studentid,
 					((MCQAssessment) completed).getCourseCode());
 			this.assessments.remove(assessment);
+		} else {
+			throw new UnauthorizedAccess("Cannot authenticate user.");
 		}
-		throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
 	public boolean isActiveSession(long sessionId) throws UnauthorizedAccess {
