@@ -142,7 +142,6 @@ public class Client {
 					assessment = stub.getAssessment(token, studentid, selected);
 					questionsModel.removeAllElements();
 					for (Question item : assessment.getQuestions()) {
-						System.out.println(item.getQuestionDetail());
 						questionsModel.addElement(item.getQuestionDetail());
 					}
 					qs.setModel(questionsModel);
