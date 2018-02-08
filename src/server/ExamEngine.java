@@ -5,6 +5,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,59 +26,65 @@ public class ExamEngine implements ExamServer {
 	public ExamEngine() {
 		super();
 
-		Date date = new Date();
-
+		Date d = null, d1 = null, d2 = null;
 		Student s1 = new Student(12345678, "password");
 		Student s2 = new Student(87654321, "password");
 
-		MCQAssessment assA = new MCQAssessment(s1.getId(), "CT454", "Computer Science", date);
-		MCQAssessment assB = new MCQAssessment(s2.getId(), "BE420", "Computer Engineering", date);
-		MCQAssessment assC = new MCQAssessment(s1.getId(), "CT111", "Electronic Engineering", date);
-		MCQAssessment assD = new MCQAssessment(s2.getId(), "BE100", "IT", date);
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		try {
+			d = sdf.parse("09/02/2018");
+			d1 = sdf.parse("13/02/2018");
+			d2 = sdf.parse("01/01/2018");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		MCQAssessment assA = new MCQAssessment(s1.getId(), "CT454", "Computer Science", d);
+		MCQAssessment assB = new MCQAssessment(s2.getId(), "BE420", "Computer Engineering", d1);
+		MCQAssessment assC = new MCQAssessment(s1.getId(), "CT111", "Electronic Engineering", d);
+		MCQAssessment assD = new MCQAssessment(s2.getId(), "BE100", "IT", d1);
+		MCQAssessment assE = new MCQAssessment(s2.getId(), "EG100", "IT", d2);
+		MCQAssessment assF = new MCQAssessment(s1.getId(), "EG100", "IT", d2);
 
 		assessments.add(assA);
 		assessments.add(assB);
 		assessments.add(assC);
 		assessments.add(assD);
+		assessments.add(assE);
+		assessments.add(assF);
 
 		String[] answers = new String[] { "An Gunna Mór", "Carrauntoohil", "Mount Brandon", "Croagh Patrick" };
 		String[] answers2 = new String[] { "Imaginary", "Fake News", "Hardware", "D" };
-		String[] answers3 = new String[] {"1","2","3","4","5"};
-		String[] answers4 = new String[] {"Everything","Nothing","Brogan","D","or E"};
+		String[] answers3 = new String[] { "1", "2", "3", "4", "5" };
+		String[] answers4 = new String[] { "Everything", "Nothing", "Brogan", "D", "or E" };
 
 		MCQQuestion question1 = new MCQQuestion("What is the tallest mountain in Ireland?", answers, 1, 1);
 		MCQQuestion question2 = new MCQQuestion("What is an FPGA?", answers2, 2, 1);
 		MCQQuestion question3 = new MCQQuestion("Which is the biggest number?", answers3, 3, 3);
 		MCQQuestion question4 = new MCQQuestion("What is raaaank?", answers4, 4, 2);
 
-
 		assA.setQuestion(question1);
 		assA.setQuestion(question2);
-		assA.setQuestion(question3);
-		assA.setQuestion(question4);
 
-		assB.setQuestion(question1);
-		assB.setQuestion(question2);
 		assB.setQuestion(question3);
 		assB.setQuestion(question4);
-		
-		assC.setQuestion(question1);
-		assC.setQuestion(question2);
+
 		assC.setQuestion(question3);
 		assC.setQuestion(question4);
 
 		assD.setQuestion(question1);
 		assD.setQuestion(question2);
-		assD.setQuestion(question3);
-		assD.setQuestion(question4);
+		
+		assE.setQuestion(question1);
+		assF.setQuestion(question2);
 	}
 
 	// Implement the methods defined in the ExamServer interface...
 	// Return an access token that allows access to the server for some time period
 
 	public long login(int studentid, String password) throws UnauthorizedAccess, RemoteException {
-		for(Session s: sessions) {
-			if(s.getStudent().getId() == studentid) {
+		for (Session s : sessions) {
+			if (s.getStudent().getId() == studentid) {
 				return s.getSessionNumber();
 			}
 		}
@@ -94,13 +102,16 @@ public class ExamEngine implements ExamServer {
 	// Return a summary list of Assessments currently available for this studentid
 	public List<String> getAvailableSummary(long token, int studentid)
 			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+		Date date = new Date();
 		List<String> list = new ArrayList<String>();
 		if (isActiveSession(token)) {
 			if (!assessments.isEmpty()) {
 				for (MCQAssessment a : assessments) {
-					if (a.getAssociatedID() == studentid) {
-						list.add(a.getInformation());
-						System.out.println("Adding assessment: " + a.getName() + " to list for " + studentid);
+					if (date.before(a.getClosingDate())) {
+						if (a.getAssociatedID() == studentid) {
+							list.add(a.getInformation());
+							System.out.println("Adding assessment: " + a.getName() + " to list for " + studentid);
+						}
 					}
 				}
 				if (!list.isEmpty()) {
@@ -133,7 +144,6 @@ public class ExamEngine implements ExamServer {
 		if (isActiveSession(token)) {
 			MCQAssessment assessment = (MCQAssessment) this.getAssessment(token, studentid,
 					((MCQAssessment) completed).getCourseCode());
-			this.assessments.remove(assessment);
 			System.out.println("Assessment completed: " + assessment.getName() + "for user " + studentid);
 		} else {
 			throw new UnauthorizedAccess("Cannot authenticate user.");
