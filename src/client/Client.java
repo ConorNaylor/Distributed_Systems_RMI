@@ -118,7 +118,7 @@ public class Client {
 				
 				assessmentSummary.setText("");
 				for (String item : summaries) {
-					assessmentSummary.setText(item);
+					assessmentSummary.append(item + "\n");
 					String coursecode = item.substring(item.lastIndexOf("course")+7, item.lastIndexOf(" for"));
 					
 					coursecodes.add(coursecode);
@@ -138,8 +138,6 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 
 				String selected = (String) assessments.getSelectedItem();
-
-				System.out.println(selected);
 				try {
 					assessment = stub.getAssessment(token, studentid, selected);
 					questionsModel.removeAllElements();
@@ -161,7 +159,6 @@ public class Client {
 				if(selectedQuestion < 0) {
 					selectedQuestion =0;
 				}
-				System.out.println("question " +selectedQuestion);
 				try {
 					question = assessment.getQuestion(selectedQuestion);
 					answersModel.removeAllElements();
