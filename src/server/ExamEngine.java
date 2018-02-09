@@ -167,7 +167,7 @@ public class ExamEngine implements ExamServer {
 						assessments.remove(assessment);
 						assessments.add(completed);
 						for(Question question:completed.getQuestions()) {
-							System.out.println("Submitted answer:" + completed.getSelectedAnswer(question.getQuestionNumber()) + "for question: " + question.getQuestionDetail());
+							System.out.println("Submitted answer: " + completed.getSelectedAnswer(question.getQuestionNumber()) + ", for question: " + question.getQuestionDetail());
 						}
 						System.out.println("Assessment completed for user " + studentid);
 					}
