@@ -135,26 +135,6 @@ public class ExamEngine implements ExamServer {
 		} throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
-//	// Submit a completed assessment
-//	public void submitAssessment(long token, int studentid, Assessment completed)
-//			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
-//		for(Question question:completed.getQuestions()) {
-//			System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
-//		}
-//		if (isActiveSession(token)) {
-//			for(Assessment assessment:assessments) {
-//				if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
-//					assessment = completed;
-//					for(Question question:assessment.getQuestions()) {
-//						System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
-//					}
-//					System.out.println("Assessment completed for user " + studentid);
-//				}
-//			}
-//		} else {
-//			throw new UnauthorizedAccess("Cannot authenticate user.");
-//		}
-//	}
 	// Submit a completed assessment
 		public void submitAssessment(long token, int studentid, Assessment completed)
 				throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
