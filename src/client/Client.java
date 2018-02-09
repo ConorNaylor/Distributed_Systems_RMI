@@ -150,6 +150,7 @@ public class Client {
 		qs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectedQuestion = qs.getSelectedIndex();
+				int answer = assessment.getSelectedAnswer(selectedQuestion);
 				if(selectedQuestion < 0) {
 					selectedQuestion =0;
 				}
@@ -160,6 +161,9 @@ public class Client {
 						answersModel.addElement(item);
 					}
 					answers.setModel(answersModel);
+					if(answer >= 0 ) {
+						answers.setSelectedIndex(answer);
+					}
 				} catch (InvalidQuestionNumber e1) {
 					e1.printStackTrace();
 				}
@@ -173,7 +177,7 @@ public class Client {
 			}
 		});
 
-		submit.addActionListener(new ActionListener() {
+		submitQuestion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int selected = answers.getSelectedIndex();
 				try {
