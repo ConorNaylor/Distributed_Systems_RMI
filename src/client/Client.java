@@ -81,7 +81,7 @@ public class Client {
 		assessmentSummary.setEditable(false);
 		assessmentSummary
 				.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		JLabel summary = new JLabel("Get Assessment Summaries");
+		JLabel summary = new JLabel("Assessment Summaries");
 
 		// select assessment
 		JLabel selectAssessment = new JLabel("Select Assessment");
@@ -99,6 +99,9 @@ public class Client {
 		JButton submitQuestion = new JButton("Submit Question Answer");
 
 		JButton submit = new JButton("Submit Assessment");
+		
+		JTextArea info = new JTextArea("");
+		info.setEditable(false);
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// login
@@ -192,7 +195,7 @@ public class Client {
 				try {
 					assessment.selectAnswer(selectedQuestion, selected);
 					int sel = assessment.getSelectedAnswer(selectedQuestion);
-					System.out.println("submitted answer " + sel);
+					info.setText("ANSWER SUBMITTED \nQuestion:" + qs.getSelectedItem() + "\nSelected Answer:"+ answers.getSelectedItem());
 				} catch (InvalidQuestionNumber e1) {
 					e1.printStackTrace();
 				} catch (InvalidOptionNumber e1) {
@@ -203,11 +206,9 @@ public class Client {
 
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				for(Question questions:assessment.getQuestions()) {
-					System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
-				}
 				try {
 					stub.submitAssessment(token, studentid, assessment);
+					info.setText("ASSESSMENT SUBMITTED: " + assessment.getInformation());
 				} catch (RemoteException | UnauthorizedAccess | NoMatchingAssessment e1) {
 					e1.printStackTrace();
 				}
@@ -233,11 +234,14 @@ public class Client {
 		contentPane.add(selectAnswer);
 		contentPane.add(answers);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 10)));
+		contentPane.add(new JLabel("Submission Info"));
+		contentPane.add(info);
+		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		contentPane.add(submitQuestion);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		contentPane.add(submit);
 		contentPane.add(Box.createRigidArea(new Dimension(5, 20)));
 		frame.setVisible(true);
-		frame.setSize(800, 600);
+		frame.setSize(800, 700);
 	}
 }
