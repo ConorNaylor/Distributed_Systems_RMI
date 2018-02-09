@@ -127,7 +127,7 @@ public class ExamEngine implements ExamServer {
 				String course = info.substring(info.lastIndexOf("course")+7, info.lastIndexOf(" for"));
 				if (a.getAssociatedID() == studentid && course.equals(courseCode)) {
 					for(Question question:a.getQuestions()) {
-						System.out.println("get assessment " +a.getSelectedAnswer(question.getQuestionNumber()));
+						System.out.println("Get assessment where answer to question " + question.getQuestionDetail() + " is " +   a.getSelectedAnswer(question.getQuestionNumber()));
 					}
 					return a;
 				}
@@ -135,26 +135,47 @@ public class ExamEngine implements ExamServer {
 		} throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
+//	// Submit a completed assessment
+//	public void submitAssessment(long token, int studentid, Assessment completed)
+//			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+//		for(Question question:completed.getQuestions()) {
+//			System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
+//		}
+//		if (isActiveSession(token)) {
+//			for(Assessment assessment:assessments) {
+//				if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
+//					assessment = completed;
+//					for(Question question:assessment.getQuestions()) {
+//						System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
+//					}
+//					System.out.println("Assessment completed for user " + studentid);
+//				}
+//			}
+//		} else {
+//			throw new UnauthorizedAccess("Cannot authenticate user.");
+//		}
+//	}
 	// Submit a completed assessment
-	public void submitAssessment(long token, int studentid, Assessment completed)
-			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
-		for(Question question:completed.getQuestions()) {
-			System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
-		}
-		if (isActiveSession(token)) {
-			for(Assessment assessment:assessments) {
-				if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
-					assessment = completed;
-					for(Question question:assessment.getQuestions()) {
-						System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
-					}
-					System.out.println("Assessment completed for user " + studentid);
-				}
+		public void submitAssessment(long token, int studentid, Assessment completed)
+				throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+			for(Question question:completed.getQuestions()) {
+				System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
 			}
-		} else {
-			throw new UnauthorizedAccess("Cannot authenticate user.");
+			if (isActiveSession(token)) {
+				for(Assessment assessment:assessments) {
+					if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
+						assessments.remove(assessment);
+						assessments.add(completed);
+						for(Question question:completed.getQuestions()) {
+							System.out.println("Submitted answer:" + completed.getSelectedAnswer(question.getQuestionNumber()) + "for question: " + question.getQuestionDetail());
+						}
+						System.out.println("Assessment completed for user " + studentid);
+					}
+				}
+			} else {
+				throw new UnauthorizedAccess("Cannot authenticate user.");
+			}
 		}
-	}
 
 	public boolean isActiveSession(long sessionId) throws UnauthorizedAccess {
 		for (Session s : sessions) {
