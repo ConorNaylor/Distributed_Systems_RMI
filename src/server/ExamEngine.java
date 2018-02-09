@@ -20,7 +20,7 @@ public class ExamEngine implements ExamServer {
 
 	private Session sess;
 	private ArrayList<Session> sessions = new ArrayList<Session>();
-	private ArrayList<MCQAssessment> assessments = new ArrayList<MCQAssessment>();
+	private ArrayList<Assessment> assessments = new ArrayList<Assessment>();
 
 	// Constructor is required
 	public ExamEngine() {
@@ -32,8 +32,8 @@ public class ExamEngine implements ExamServer {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		try {
-			d = sdf.parse("09/02/2018");
-			d1 = sdf.parse("13/02/2018");
+			d = sdf.parse("3/05/2018");
+			d1 = sdf.parse("13/05/2018");
 			d2 = sdf.parse("01/01/2018");
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -81,7 +81,6 @@ public class ExamEngine implements ExamServer {
 
 	// Implement the methods defined in the ExamServer interface...
 	// Return an access token that allows access to the server for some time period
-
 	public long login(int studentid, String password) throws UnauthorizedAccess, RemoteException {
 		for (Session s : sessions) {
 			if (s.getStudent().getId() == studentid) {
@@ -95,8 +94,7 @@ public class ExamEngine implements ExamServer {
 				System.out.println("Session created for student: " + s.getId() + ".");
 				return sess.getSessionNumber();
 			}
-		}
-		throw new UnauthorizedAccess("Could not authenticate.");
+		} throw new UnauthorizedAccess("Could not authenticate.");
 	}
 
 	// Return a summary list of Assessments currently available for this studentid
@@ -106,45 +104,53 @@ public class ExamEngine implements ExamServer {
 		List<String> list = new ArrayList<String>();
 		if (isActiveSession(token)) {
 			if (!assessments.isEmpty()) {
-				for (MCQAssessment a : assessments) {
+				for (Assessment a : assessments) {
 					if (date.before(a.getClosingDate())) {
 						if (a.getAssociatedID() == studentid) {
 							list.add(a.getInformation());
-							System.out.println("Adding assessment: " + a.getName() + " to list for " + studentid);
 						}
 					}
 				}
 				if (!list.isEmpty()) {
 					return list;
 				}
-			}
-			throw new NoMatchingAssessment("User has no assessments.");
-		}
-		throw new UnauthorizedAccess("");
+			} throw new NoMatchingAssessment("User has no assessments.");
+		} throw new UnauthorizedAccess("");
 	}
 
 	// Return an Assessment object associated with a particular course code
 	public Assessment getAssessment(long token, int studentid, String courseCode)
 			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
 		if (isActiveSession(token)) {
-			for (MCQAssessment a : assessments) {
-				if (a.getAssociatedID() == studentid && a.getCourseCode().equals(courseCode)) {
-					System.out.println("Returning assessment: " + a.getName() + " for " + studentid);
+			for (Assessment a : assessments) {
+				String info = a.getInformation();
+				String course = info.substring(info.lastIndexOf("course")+7, info.lastIndexOf(" for"));
+				if (a.getAssociatedID() == studentid && course.equals(courseCode)) {
+					for(Question question:a.getQuestions()) {
+						System.out.println("get assessment " +a.getSelectedAnswer(question.getQuestionNumber()));
+					}
 					return a;
 				}
-			}
-			throw new NoMatchingAssessment("User has no assessments.");
-		}
-		throw new UnauthorizedAccess("Cannot authenticate user.");
+			} throw new NoMatchingAssessment("User has no assessments.");
+		} throw new UnauthorizedAccess("Cannot authenticate user.");
 	}
 
 	// Submit a completed assessment
 	public void submitAssessment(long token, int studentid, Assessment completed)
 			throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+		for(Question question:completed.getQuestions()) {
+			System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
+		}
 		if (isActiveSession(token)) {
-			MCQAssessment assessment = (MCQAssessment) this.getAssessment(token, studentid,
-					((MCQAssessment) completed).getCourseCode());
-			System.out.println("Assessment completed: " + assessment.getName() + "for user " + studentid);
+			for(Assessment assessment:assessments) {
+				if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
+					assessment = completed;
+					for(Question question:assessment.getQuestions()) {
+						System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
+					}
+					System.out.println("Assessment completed for user " + studentid);
+				}
+			}
 		} else {
 			throw new UnauthorizedAccess("Cannot authenticate user.");
 		}
@@ -162,7 +168,6 @@ public class ExamEngine implements ExamServer {
 	public static void main(String[] args) {
 		if (System.getSecurityManager() == null) {
 			System.setProperty("java.security.policy", "security.policy");
-			// System.setProperty("java.rmi.server.hostname","localhost");
 			System.setSecurityManager(new SecurityManager());
 		}
 		try {

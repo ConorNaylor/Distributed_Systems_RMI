@@ -44,7 +44,7 @@ public class Client {
 	private static Assessment assessment;
 	private static Question question;
 	private static int selectedQuestion;
-	
+
 	public static void main(String[] args) {
 		GUI();
 		String host = (args.length < 1) ? null : args[0];
@@ -69,8 +69,10 @@ public class Client {
 		JLabel usernameLabel = new JLabel("Username");
 		JLabel passwordLabel = new JLabel("Password");
 		JTextArea username = new JTextArea("");
+		username.setSize(100, 30);
 		username.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		JTextArea password = new JTextArea("");
+		password.setSize(100, 30);
 		password.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		JButton login = new JButton("Login");
 
@@ -95,7 +97,7 @@ public class Client {
 		DefaultComboBoxModel answersModel = (DefaultComboBoxModel) answers.getModel();
 
 		JButton submitQuestion = new JButton("Submit Question Answer");
-		
+
 		JButton submit = new JButton("Submit Assessment");
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -113,13 +115,13 @@ public class Client {
 				} catch (NoMatchingAssessment e1) {
 					System.out.println(e1.getMessage());
 				}
-				
+
 				coursecodes = new ArrayList<String>();
-				
+
 				assessmentSummary.setText("");
 				for (String item : summaries) {
 					assessmentSummary.append(item + "\n");
-					String coursecode = item.substring(item.lastIndexOf("course")+7, item.lastIndexOf(" for"));
+					String coursecode = item.substring(item.lastIndexOf("course") + 7, item.lastIndexOf(" for"));
 					coursecodes.add(coursecode);
 				}
 				assessmentsModel.removeAllElements();
@@ -150,9 +152,15 @@ public class Client {
 		qs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectedQuestion = qs.getSelectedIndex();
-				int answer = assessment.getSelectedAnswer(selectedQuestion);
-				if(selectedQuestion < 0) {
-					selectedQuestion =0;
+				int answer = 0;
+				try {
+					answer = assessment.getSelectedAnswer(selectedQuestion);
+					System.out.println("Previously selected answer " + answer);
+				} catch (Exception e1) {
+
+				}
+				if (selectedQuestion < 0) {
+					selectedQuestion = 0;
 				}
 				try {
 					question = assessment.getQuestion(selectedQuestion);
@@ -161,27 +169,30 @@ public class Client {
 						answersModel.addElement(item);
 					}
 					answers.setModel(answersModel);
-					if(answer >= 0 ) {
+					if (answer >= 0) {
 						answers.setSelectedIndex(answer);
 					}
 				} catch (InvalidQuestionNumber e1) {
 					e1.printStackTrace();
 				}
-				
+
 			}
 		});
-		
+
 		answers.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			
+
 			}
 		});
 
 		submitQuestion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int selected = answers.getSelectedIndex();
+				System.out.println("selected " + selected);
 				try {
 					assessment.selectAnswer(selectedQuestion, selected);
+					int sel = assessment.getSelectedAnswer(selectedQuestion);
+					System.out.println("submitted answer " + sel);
 				} catch (InvalidQuestionNumber e1) {
 					e1.printStackTrace();
 				} catch (InvalidOptionNumber e1) {
@@ -189,9 +200,12 @@ public class Client {
 				}
 			}
 		});
-		
+
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				for(Question questions:assessment.getQuestions()) {
+					System.out.println(assessment.getSelectedAnswer(question.getQuestionNumber()));
+				}
 				try {
 					stub.submitAssessment(token, studentid, assessment);
 				} catch (RemoteException | UnauthorizedAccess | NoMatchingAssessment e1) {
