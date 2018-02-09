@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import exceptions.*;
@@ -138,19 +139,19 @@ public class ExamEngine implements ExamServer {
 	// Submit a completed assessment
 		public void submitAssessment(long token, int studentid, Assessment completed)
 				throws UnauthorizedAccess, NoMatchingAssessment, RemoteException {
-			for(Question question:completed.getQuestions()) {
-				System.out.println(completed.getSelectedAnswer(question.getQuestionNumber()));
-			}
+			boolean complete = false;
 			if (isActiveSession(token)) {
-				for(Assessment assessment:assessments) {
+				Iterator<Assessment> assessmentIterator = assessments.iterator();
+				while(assessmentIterator.hasNext()) {
+					Assessment assessment = assessmentIterator.next();
 					if(assessment.getAssociatedID() == studentid && assessment.getInformation().equals(completed.getInformation())) {;
-						assessments.remove(assessment);
-						assessments.add(completed);
-						for(Question question:completed.getQuestions()) {
-							System.out.println("Submitted answer: " + completed.getSelectedAnswer(question.getQuestionNumber()) + ", for question: " + question.getQuestionDetail());
-						}
+						assessmentIterator.remove();
+						complete = true;
 						System.out.println("Assessment completed for user " + studentid);
 					}
+				}
+				if(complete) {
+					assessments.add(completed);
 				}
 			} else {
 				throw new UnauthorizedAccess("Cannot authenticate user.");
