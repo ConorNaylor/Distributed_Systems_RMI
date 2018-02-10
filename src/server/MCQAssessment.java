@@ -1,5 +1,6 @@
 package server;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +31,8 @@ public class MCQAssessment implements Assessment{
 	
 	@Override
 	public String getInformation() {
-		return "Assessment " + name + " for course " + this.courseCode + " for student " + studentId + " with closing date " + date; 
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		return "Assessment " + name + " for course " + this.courseCode + " for student " + studentId + " with closing date " + sdf.format(date); 
 	}
 
 	@Override

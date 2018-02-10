@@ -84,7 +84,7 @@ public class ExamEngine implements ExamServer {
 	// Return an access token that allows access to the server for some time period
 	public long login(int studentid, String password) throws UnauthorizedAccess, RemoteException {
 		for (Session s : sessions) {
-			if (s.getStudent().getId() == studentid) {
+			if (s.getStudent().getId() == studentid && s.isSessionActive()) {
 				return s.getSessionNumber();
 			}
 		}
