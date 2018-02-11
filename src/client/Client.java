@@ -121,6 +121,10 @@ public class Client {
 
 				coursecodes = new ArrayList<String>();
 
+				if(summaries == null) {
+					summaries = new ArrayList<String>();
+					summaries.add("No assessments available");
+				}
 				assessmentSummary.setText("");
 				for (String item : summaries) {
 					assessmentSummary.append(item + "\n");
