@@ -30,6 +30,7 @@ public class ExamEngine implements ExamServer {
 		Date d = null, d1 = null, d2 = null;
 		Student s1 = new Student(12345678, "password");
 		Student s2 = new Student(87654321, "password");
+		Student s3 = new Student(22223333, "password");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		try {
